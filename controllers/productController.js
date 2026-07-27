@@ -36,7 +36,14 @@ const createProduct = async (req, res) => {
     const { name, description, image, category, subcategory, price, brands, sku, features, specifications, material, size, capacity, warranty, applications, tabs } = req.body;
     
     if (!name || !description || !category) {
-      return res.status(400).json({ success: false, error: 'Please provide all required fields' });
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Please provide all required fields',
+        debug: {
+          received: { name, description, category },
+          body: req.body
+        }
+      });
     }
     
     // Clean up empty ObjectIds
