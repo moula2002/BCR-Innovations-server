@@ -18,6 +18,10 @@ const productSchema = new mongoose.Schema({
     type: String, // matching the custom 'id' field in Category
     required: true
   },
+  subcategory: {
+    type: String, // matching the custom 'id' field in Subcategory
+    default: ''
+  },
   price: {
     type: String,
     default: ''
