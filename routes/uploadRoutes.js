@@ -3,12 +3,11 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const { protect } = require('../middleware/authMiddleware');
-
 const fs = require('fs');
 
 const storage = multer.diskStorage({
   destination(req, file, cb) {
-    const dir = 'uploads/';
+    const dir = path.join(__dirname, '../uploads');
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
@@ -27,7 +26,7 @@ function checkFileType(file, cb) {
   if (extname && mimetype) {
     return cb(null, true);
   } else {
-    cb('Images only!');
+    cb(new Error('Images only!'));
   }
 }
 
@@ -38,11 +37,17 @@ const upload = multer({
   }
 });
 
-router.post('/', protect, upload.single('image'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No image provided' });
-  }
-  res.send(`/${req.file.path.replace(/\\/g, '/')}`);
+router.post('/', protect, (req, res) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) {
+      console.error('Upload error:', err);
+      return res.status(400).json({ error: err.message || 'Error uploading file' });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image provided' });
+    }
+    res.send(`/uploads/${req.file.filename}`);
+  });
 });
 
 module.exports = router;
