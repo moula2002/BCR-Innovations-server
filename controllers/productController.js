@@ -33,14 +33,18 @@ const getProductById = async (req, res) => {
 // @access  Private
 const createProduct = async (req, res) => {
   try {
-    const { name, description, image, category, price, brands, sku, features, specifications, material, size, capacity, warranty, applications } = req.body;
+    const { name, description, image, category, subcategory, price, brands, sku, features, specifications, material, size, capacity, warranty, applications, tabs } = req.body;
     
-    if (!name || !description || !image || !category || !price) {
+    if (!name || !description || !category) {
       return res.status(400).json({ success: false, error: 'Please provide all required fields' });
     }
+    
+    // Clean up empty ObjectIds
+    const parsedImage = image || null;
+    const parsedTabs = Array.isArray(tabs) ? tabs.map(t => ({...t, image: t.image || null})) : [];
 
     const product = await Product.create({
-      name, description, image, category, price, brands, sku, features, specifications, material, size, capacity, warranty, applications
+      name, description, image: parsedImage, category, subcategory, price, brands, sku, features, specifications, material, size, capacity, warranty, applications, tabs: parsedTabs
     });
 
     // Update Category count
@@ -68,6 +72,12 @@ const updateProduct = async (req, res) => {
     // Handle array features properly if passed as a comma-separated string or array
     if (req.body.features && typeof req.body.features === 'string') {
       req.body.features = req.body.features.split(',').map(f => f.trim());
+    }
+
+    // Clean up empty ObjectIds
+    if (req.body.image === '') req.body.image = null;
+    if (Array.isArray(req.body.tabs)) {
+      req.body.tabs = req.body.tabs.map(t => ({...t, image: t.image || null}));
     }
 
     product = await Product.findByIdAndUpdate(req.params.id, req.body, {

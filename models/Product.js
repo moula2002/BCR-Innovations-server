@@ -63,7 +63,18 @@ const productSchema = new mongoose.Schema({
   applications: {
     type: String,
     default: ''
-  }
+  },
+  tabs: [{
+    name: { type: String, required: true },
+    title: { type: String, default: '' },
+    description: { type: String, default: '' },
+    image: { type: mongoose.Schema.Types.ObjectId, ref: 'Image', default: null },
+    features: [{
+      heading: { type: String, default: '' },
+      description: { type: String, default: '' },
+      icon: { type: String, default: '' }
+    }]
+  }]
 }, {
   timestamps: true
 });
