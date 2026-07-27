@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
+const Image = require('./models/Image');
 
 const updateDocs = async () => {
   try {
@@ -10,16 +13,51 @@ const updateDocs = async () => {
     for (const col of collections) {
       try {
         const collection = db.collection(col);
-        const docs = await collection.find({ image: { $regex: '^https://bcr-innovations-server-1.onrender.com' } }).toArray();
+        // Find documents where the image field is a string
+        const docs = await collection.find({ image: { $type: "string" } }).toArray();
         let count = 0;
+        
         for (const doc of docs) {
-          const newImage = doc.image.replace('https://bcr-innovations-server-1.onrender.com', '');
-          await collection.updateOne({ _id: doc._id }, { $set: { image: newImage } });
-          count++;
+          const imageStr = doc.image;
+          
+          // Extract filename from the string path
+          let filename = '';
+          if (imageStr.includes('/uploads/')) {
+            filename = imageStr.split('/uploads/').pop();
+          } else {
+            filename = imageStr.split('/').pop();
+          }
+          
+          if (!filename) continue;
+
+          const filePath = path.join(__dirname, 'uploads', filename);
+          
+          if (fs.existsSync(filePath)) {
+            const fileData = fs.readFileSync(filePath);
+            let ext = path.extname(filename).substring(1) || 'jpeg';
+            if (ext === 'jpg') ext = 'jpeg';
+            const contentType = `image/${ext}`;
+            
+            // Create and save the new Image document containing raw binary data
+            const newImage = new Image({
+              name: filename,
+              data: fileData,
+              contentType: contentType
+            });
+            
+            const savedImage = await newImage.save();
+            
+            // Update the original document to reference the new Image ObjectId
+            await collection.updateOne({ _id: doc._id }, { $set: { image: savedImage._id } });
+            count++;
+            console.log(`Updated document ${doc._id} in ${col}`);
+          } else {
+            console.log(`Skipped ${doc._id} - File not found: ${filePath}`);
+          }
         }
-        console.log(`Updated ${count} documents in ${col}`);
+        console.log(`Finished processing ${col}. Updated ${count} documents.`);
       } catch (err) {
-        console.log(`Skipping collection ${col} due to error or non-existence`);
+        console.log(`Skipping collection ${col} due to error: ${err.message}`);
       }
     }
     console.log('Database updated successfully');
