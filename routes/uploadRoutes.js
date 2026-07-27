@@ -2,31 +2,10 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const mongoose = require('mongoose');
 const { protect } = require('../middleware/authMiddleware');
-const fs = require('fs');
 
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    try {
-      const dir = path.join(__dirname, '../uploads');
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      cb(null, dir);
-    } catch (err) {
-      console.error('Destination error:', err);
-      cb(err);
-    }
-  },
-  filename(req, file, cb) {
-    try {
-      cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-    } catch (err) {
-      console.error('Filename error:', err);
-      cb(err);
-    }
-  }
-});
+const storage = multer.memoryStorage();
 
 function checkFileType(file, cb) {
   try {
@@ -52,18 +31,36 @@ const upload = multer({
   }
 });
 
-router.post('/', protect, (req, res) => {
+router.post('/', protect, upload.single('image'), async (req, res) => {
   try {
-    upload.single('image')(req, res, (err) => {
-      if (err) {
-        console.error('Upload error:', err);
-        return res.status(400).json({ error: err.message || 'Error uploading file' });
-      }
-      if (!req.file) {
-        return res.status(400).json({ error: 'No image provided' });
-      }
-      res.send(`/uploads/${req.file.filename}`);
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image provided' });
+    }
+
+    const db = mongoose.connection.db;
+    const bucket = new mongoose.mongo.GridFSBucket(db, {
+      bucketName: 'uploads'
     });
+
+    const filename = `image-${Date.now()}${path.extname(req.file.originalname)}`;
+    
+    // Create an upload stream to GridFS
+    const uploadStream = bucket.openUploadStream(filename, {
+      contentType: req.file.mimetype
+    });
+    
+    // Write the buffer to the stream
+    uploadStream.end(req.file.buffer);
+
+    uploadStream.on('finish', () => {
+      res.send(`/uploads/${filename}`);
+    });
+
+    uploadStream.on('error', (err) => {
+      console.error('GridFS Upload Error:', err);
+      res.status(500).json({ error: 'Failed to upload image to database' });
+    });
+
   } catch (error) {
     console.error('Route error:', error);
     return res.status(500).json({ error: 'Internal Server Error during upload' });
