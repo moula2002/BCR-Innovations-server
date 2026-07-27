@@ -40,7 +40,8 @@ app.get('/uploads/:filename', async (req, res) => {
     
     res.set('Content-Type', image.contentType);
     res.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
-    res.send(image.data);
+    const buffer = Buffer.from(image.data, 'base64');
+    res.send(buffer);
   } catch (error) {
     console.error('Image fetch error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -59,7 +60,8 @@ app.get('/api/images/:id', async (req, res) => {
     
     res.set('Content-Type', image.contentType);
     res.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
-    res.send(image.data);
+    const buffer = Buffer.from(image.data, 'base64');
+    res.send(buffer);
   } catch (error) {
     console.error('Image fetch error:', error);
     res.status(500).json({ error: 'Internal Server Error' });

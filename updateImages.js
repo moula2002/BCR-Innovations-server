@@ -38,10 +38,10 @@ const updateDocs = async () => {
             if (ext === 'jpg') ext = 'jpeg';
             const contentType = `image/${ext}`;
             
-            // Create and save the new Image document containing raw binary data
+            // Create and save the new Image document containing base64 string
             const newImage = new Image({
               name: filename,
-              data: fileData,
+              data: fileData.toString('base64'),
               contentType: contentType
             });
             

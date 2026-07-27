@@ -39,10 +39,10 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
 
     const filename = `${Date.now()}-${req.file.originalname}`;
     
-    // Save image buffer to MongoDB directly
+    // Save image buffer as a base64 string to MongoDB directly
     const newImage = new Image({
       name: filename,
-      data: req.file.buffer,
+      data: req.file.buffer.toString('base64'),
       contentType: req.file.mimetype
     });
     
