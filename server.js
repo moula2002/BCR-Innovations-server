@@ -29,29 +29,18 @@ app.use('/api/careers', careerRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/upload', uploadRoutes);
 
+const Image = require('./models/Image');
+
 app.get('/uploads/:filename', async (req, res) => {
   try {
-    const db = mongoose.connection.db;
-    if (!db) {
-      return res.status(500).json({ error: 'Database not initialized' });
-    }
-    const bucket = new mongoose.mongo.GridFSBucket(db, {
-      bucketName: 'uploads'
-    });
-    
-    const files = await bucket.find({ filename: req.params.filename }).toArray();
-    if (!files || files.length === 0) {
+    const image = await Image.findOne({ name: req.params.filename });
+    if (!image) {
       return res.status(404).json({ error: 'Image not found' });
     }
     
-    res.set('Content-Type', files[0].contentType);
+    res.set('Content-Type', image.contentType);
     res.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
-    const downloadStream = bucket.openDownloadStreamByName(req.params.filename);
-    downloadStream.pipe(res);
-    
-    downloadStream.on('error', () => {
-      res.status(404).json({ error: 'Error streaming image' });
-    });
+    res.send(image.data);
   } catch (error) {
     console.error('Image fetch error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
