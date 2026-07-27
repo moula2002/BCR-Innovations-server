@@ -17,8 +17,9 @@ const categorySchema = new mongoose.Schema({
     default: ''
   },
   image: {
-    type: String,
-    default: ''
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Image',
+    default: null
   },
   seoTitle: {
     type: String,

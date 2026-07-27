@@ -48,7 +48,7 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
     
     await newImage.save();
 
-    res.send(`/uploads/${filename}`);
+    res.send(newImage._id.toString());
   } catch (error) {
     console.error('Route error:', error);
     return res.status(500).json({ error: 'Internal Server Error during upload' });

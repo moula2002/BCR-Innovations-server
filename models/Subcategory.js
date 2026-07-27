@@ -21,8 +21,9 @@ const subcategorySchema = new mongoose.Schema({
     default: ''
   },
   image: {
-    type: String,
-    default: ''
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Image',
+    default: null
   },
   count: {
     type: Number,
