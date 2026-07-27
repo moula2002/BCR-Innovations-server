@@ -50,8 +50,16 @@ const createProduct = async (req, res) => {
     const parsedImage = image || null;
     const parsedTabs = Array.isArray(tabs) ? tabs.map(t => ({...t, image: t.image || null})) : [];
 
+    // Parse features string to array if it is a string
+    let parsedFeatures = features;
+    if (features && typeof features === 'string') {
+      parsedFeatures = features.split(',').map(f => f.trim());
+    } else if (!features) {
+      parsedFeatures = [];
+    }
+
     const product = await Product.create({
-      name, description, image: parsedImage, category, subcategory, price, brands, sku, features, specifications, material, size, capacity, warranty, applications, tabs: parsedTabs
+      name, description, image: parsedImage, category, subcategory, price, brands, sku, features: parsedFeatures, specifications, material, size, capacity, warranty, applications, tabs: parsedTabs
     });
 
     // Update Category count
