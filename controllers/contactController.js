@@ -72,16 +72,18 @@ const createContact = async (req, res) => {
 
     const text = `NEW CUSTOMER INQUIRY\n\nName: ${senderName}\nEmail: ${email}\nPhone: ${phone || 'N/A'}\nProduct: ${product || 'N/A'}\nSubject: ${subject || 'N/A'}\n\nMessage:\n${message}`;
 
-    try {
-      await sendEmail({
-        to: 'bcrinnovations2026@gmail.com',
-        replyTo: email,
-        subject: mailSubject,
-        html,
-        text
-      });
-    } catch (mailErr) {
-      console.warn('Nodemailer background mail warning:', mailErr.message);
+    if (!req.body.skipEmail) {
+      try {
+        await sendEmail({
+          to: 'bcrinnovations2026@gmail.com',
+          replyTo: email,
+          subject: mailSubject,
+          html,
+          text
+        });
+      } catch (mailErr) {
+        console.warn('Nodemailer background mail warning:', mailErr.message);
+      }
     }
 
     res.status(201).json({
