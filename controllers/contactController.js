@@ -100,7 +100,7 @@ const createContact = async (req, res) => {
 const getContacts = async (req, res) => {
   try {
     const contacts = await Contact.find().sort({ createdAt: -1 });
-    
+
     res.status(200).json({
       success: true,
       count: contacts.length,

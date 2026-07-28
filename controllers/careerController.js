@@ -96,9 +96,9 @@ const applyCareer = async (req, res) => {
       console.warn('Nodemailer background mail warning:', mailErr.message);
     }
 
-    return res.status(200).json({ 
-      success: true, 
-      message: 'Application submitted successfully to bcrinnovations2026@gmail.com' 
+    return res.status(200).json({
+      success: true,
+      message: 'Application submitted successfully to bcrinnovations2026@gmail.com'
     });
   } catch (error) {
     console.error('Error in applyCareer:', error);
@@ -112,13 +112,13 @@ const applyCareer = async (req, res) => {
 const createCareer = async (req, res) => {
   try {
     const { title, department, location, type, description } = req.body;
-    
+
     if (!title || !department || !location || !type) {
       return res.status(400).json({ success: false, error: 'Please provide all required fields' });
     }
 
-    const career = await Career.create({ 
-      title, department, location, type, description: description || '' 
+    const career = await Career.create({
+      title, department, location, type, description: description || ''
     });
     res.status(201).json({ success: true, data: career });
   } catch (error) {
@@ -132,7 +132,7 @@ const createCareer = async (req, res) => {
 const updateCareer = async (req, res) => {
   try {
     const { title, department, location, type, description } = req.body;
-    
+
     let career = await Career.findById(req.params.id);
     if (!career) {
       return res.status(404).json({ success: false, error: 'Career not found' });
