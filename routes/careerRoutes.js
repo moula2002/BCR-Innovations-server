@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getCareers, createCareer, updateCareer, deleteCareer } = require('../controllers/careerController');
+const { getCareers, applyCareer, createCareer, updateCareer, deleteCareer } = require('../controllers/careerController');
 const { protect } = require('../middleware/authMiddleware');
+
+router.post('/apply', applyCareer);
 
 router.route('/')
   .get(getCareers)
