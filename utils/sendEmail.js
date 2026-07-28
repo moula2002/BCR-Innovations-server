@@ -2,25 +2,25 @@ const nodemailer = require('nodemailer');
 
 const sendEmail = async ({ to = 'bcrinnovations2026@gmail.com', subject, html, text, replyTo }) => {
   const targetEmail = 'bcrinnovations2026@gmail.com';
-  const hasSmtpConfig = Boolean(process.env.EMAIL_PASS || process.env.GMAIL_PASS || process.env.SMTP_PASS);
+  const rawPass = process.env.EMAIL_PASS || process.env.GMAIL_PASS || process.env.SMTP_PASS;
+  const pass = rawPass ? rawPass.replace(/\s+/g, '') : '';
+  const user = process.env.EMAIL_USER || process.env.GMAIL_USER || targetEmail;
+  const hasSmtpConfig = Boolean(pass);
 
   if (hasSmtpConfig) {
     try {
       const transporter = nodemailer.createTransport({
         service: process.env.SMTP_SERVICE || 'gmail',
-        host: process.env.SMTP_HOST || 'smtp.gmail.com',
-        port: Number(process.env.SMTP_PORT) || 465,
-        secure: true,
         auth: {
-          user: process.env.EMAIL_USER || process.env.GMAIL_USER || targetEmail,
-          pass: process.env.EMAIL_PASS || process.env.GMAIL_PASS || process.env.SMTP_PASS,
+          user: user,
+          pass: pass,
         },
       });
 
       const info = await transporter.sendMail({
-        from: `"BCR Innovations" <${process.env.GMAIL_USER || targetEmail}>`,
-        to: targetEmail,
-        replyTo: replyTo || targetEmail,
+        from: `"BCR Innovations" <${user}>`,
+        to: to || targetEmail,
+        replyTo: replyTo || user,
         subject: subject,
         html: html,
         text: text,
