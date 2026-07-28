@@ -16,7 +16,7 @@ mongoose.connect(process.env.MONGODB_URI).then(async () => {
   await Admin.findOneAndUpdate(
     { username },
     { username, password: hashedPassword },
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: 'after' }
   );
   console.log(`Updated/created test admin: ${username}`);
   

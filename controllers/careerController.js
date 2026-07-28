@@ -134,7 +134,7 @@ const updateCareer = async (req, res) => {
     career = await Career.findByIdAndUpdate(
       req.params.id,
       { title, department, location, type, description },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     res.status(200).json({ success: true, data: career });

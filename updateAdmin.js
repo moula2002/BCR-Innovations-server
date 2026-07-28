@@ -18,7 +18,7 @@ mongoose.connect(process.env.MONGODB_URI)
         username: 'bcrinnovation@gmail.com',
         password: hashedPassword
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     console.log('Admin user updated successfully with hashed password!');

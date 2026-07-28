@@ -65,7 +65,7 @@ const updateCategory = async (req, res) => {
     category = await Category.findOneAndUpdate(
       { id: req.params.id },
       { name, description, image, seoTitle, seoDescription },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     res.status(200).json({ success: true, data: category });

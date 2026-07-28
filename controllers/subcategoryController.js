@@ -67,7 +67,7 @@ const updateSubcategory = async (req, res) => {
     subcategory = await Subcategory.findOneAndUpdate(
       { id: req.params.id },
       { name, parentCategory, description, image },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     res.status(200).json({ success: true, data: subcategory });
