@@ -11,11 +11,6 @@ const adminSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  email: {
-    type: String,
-    trim: true,
-    default: 'admin@bcr.com'
-  },
   profileImage: {
     type: String,
     default: ''

@@ -36,7 +36,6 @@ const login = async (req, res) => {
       admin: {
         id: admin._id,
         username: admin.username,
-        email: admin.email,
         profileImage: admin.profileImage
       }
     });
@@ -67,14 +66,14 @@ const getProfile = async (req, res) => {
 // @access  Private
 const updateProfile = async (req, res) => {
   try {
-    const { email, newPassword, profileImage } = req.body;
+    const { username, newPassword, profileImage } = req.body;
     const admin = await Admin.findById(req.admin.id);
 
     if (!admin) {
       return res.status(404).json({ success: false, error: 'Admin not found' });
     }
 
-    if (email) admin.email = email;
+    if (username) admin.username = username;
     if (profileImage !== undefined) admin.profileImage = profileImage;
     if (newPassword) {
       const salt = await bcrypt.genSalt(10);
@@ -88,7 +87,6 @@ const updateProfile = async (req, res) => {
       data: {
         id: admin._id,
         username: admin.username,
-        email: admin.email,
         profileImage: admin.profileImage
       }
     });
