@@ -35,7 +35,9 @@ const login = async (req, res) => {
       token,
       admin: {
         id: admin._id,
-        username: admin.username
+        username: admin.username,
+        email: admin.email,
+        profileImage: admin.profileImage
       }
     });
   } catch (error) {
@@ -44,6 +46,60 @@ const login = async (req, res) => {
   }
 };
 
+// @desc    Get admin profile
+// @route   GET /api/auth/profile
+// @access  Private
+const getProfile = async (req, res) => {
+  try {
+    const admin = await Admin.findById(req.admin.id).select('-password');
+    if (!admin) {
+      return res.status(404).json({ success: false, error: 'Admin not found' });
+    }
+    res.status(200).json({ success: true, data: admin });
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    res.status(500).json({ success: false, error: 'Server Error' });
+  }
+};
+
+// @desc    Update admin profile
+// @route   PUT /api/auth/profile
+// @access  Private
+const updateProfile = async (req, res) => {
+  try {
+    const { email, newPassword, profileImage } = req.body;
+    const admin = await Admin.findById(req.admin.id);
+
+    if (!admin) {
+      return res.status(404).json({ success: false, error: 'Admin not found' });
+    }
+
+    if (email) admin.email = email;
+    if (profileImage !== undefined) admin.profileImage = profileImage;
+    if (newPassword) {
+      const salt = await bcrypt.genSalt(10);
+      admin.password = await bcrypt.hash(newPassword, salt);
+    }
+
+    await admin.save();
+
+    res.status(200).json({
+      success: true,
+      data: {
+        id: admin._id,
+        username: admin.username,
+        email: admin.email,
+        profileImage: admin.profileImage
+      }
+    });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({ success: false, error: 'Server Error' });
+  }
+};
+
 module.exports = {
-  login
+  login,
+  getProfile,
+  updateProfile
 };
